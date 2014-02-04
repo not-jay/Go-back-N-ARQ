@@ -41,6 +41,10 @@ public class StaticFrame extends Entity {
 		return this;
 	}
 	
+	public Type type() {
+		return type;
+	}
+	
 	@Override
 	public void render(Graphics2D g) {		
 		super.render(g); //Can be omitted since it doesn't use sprites/animation, it will only draws debug lines
@@ -68,16 +72,23 @@ public class StaticFrame extends Entity {
 	public void collisionResponse(Entity other) {
 		Frame frame = (Frame)other;
 		EntityManager em = EntityManager.getInstance();
+		ARQManager arq = ARQManager.getInstance();
 		
 		switch(frame.type()) {
 		case ACK:
 			setType(Type.RECEIVED);
-			ARQManager.getInstance().sender().window().slideWindow();
+			arq.sender().window().slideWindow();
 			break;
 		case DATA:
 			setType(Type.RECEIVED);
 			em.add(new Frame(x(), y() - 16).setType(Frame.Type.ACK));
-			ARQManager.getInstance().receiver().window().slideWindow();
+			arq.receiver().window().slideWindow();
+			break;
+		case DAMAGED_DATA:
+			em.add(new Frame(x(), y() - 16).setType(Frame.Type.NACK));
+			break;
+		case NACK:
+			em.add(new Frame(x(), y() + 16).setType(Frame.Type.DATA));
 			break;
 		}
 	}

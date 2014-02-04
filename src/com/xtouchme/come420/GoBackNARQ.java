@@ -2,7 +2,6 @@ package com.xtouchme.come420;
 
 import java.applet.Applet;
 import java.awt.Color;
-import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
@@ -11,7 +10,6 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
-import com.xtouchme.come420.Frame.Type;
 import com.xtouchme.gamebase.managers.EntityManager;
 import com.xtouchme.gamebase.managers.InputManager;
 import com.xtouchme.gamebase.managers.ResourceManager;
@@ -51,9 +49,10 @@ public class GoBackNARQ extends Applet implements Runnable, KeyListener, MouseLi
 		setBackground(Color.white);
 		setFocusable(true);
 		addKeyListener(this);
+		addMouseListener(this);
 		
-		Frame frame = (Frame) this.getParent().getParent();
-		frame.setTitle("Yet Another SHMUP");
+//		Frame frame = (Frame) this.getParent().getParent();
+//		frame.setTitle("Yet Another SHMUP");
 		
 		//Initialize managers
 		ResourceManager.getInstance(getDocumentBase(), "data"); //Holds methods for getting resources, initialized with the "data" folder

@@ -34,7 +34,6 @@ public class SlidingWindow extends Entity {
 
 	public SlidingWindow setType(Type type) {
 		this.type = type;
-		if(type == Type.SENDER) window.senderWindow();
 		return this;
 	}
 	
@@ -54,10 +53,6 @@ public class SlidingWindow extends Entity {
 			break;
 		}
 		g.setFont(def);
-		
-		window.render(g);
-		
-		for(StaticFrame f : frames) f.render(g);
 	}
 	
 	public SlidingWindow fillFrames(int size) {

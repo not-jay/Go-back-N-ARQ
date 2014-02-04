@@ -1,7 +1,8 @@
 package com.xtouchme.come420;
 
 import java.awt.Graphics2D;
-import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 
 import com.xtouchme.come420.Frame.Type;
@@ -11,17 +12,22 @@ import com.xtouchme.gamebase.managers.InputManager;
 
 public class Window extends Entity {
 
-	//TODO: Click detection (Ang window lng i click para mu send ug frame?) + GO-BACK-N ARQ Logic na mu move sa window inig recieve ug ACK sa leftmost frame
+	//TODO: Fix up receiveFrom()
+	
+	public enum Type {
+		SENDER, RECEIVER
+	}
 	
 	private int size;
 	private int frameIndex;
 	private int sendIndex;
+	private Type type;
 	private Rectangle2D window;
 	
 	public Window(float x, float y) {
 		super(x, y);
 		
-		size = 5;
+		size = ARQManager.getInstance().windowSize();
 		
 		setIndex(0).setHeight(32);
 		
@@ -36,9 +42,12 @@ public class Window extends Entity {
 		EntityManager em = EntityManager.getInstance();
 		InputManager im = InputManager.getInstance();
 		
-		if(im.isKeyPressed("Send Data") && sendIndex < (size + frameIndex)) {
-		//if(im.isMouseClicked(MouseEvent.BUTTON1)) {
-			em.add(new Frame(x() + 16 * sendIndex, y() + 16).setType(Type.DATA));
+		//if(im.isKeyPressed("Send Data") && sendIndex < (size + frameIndex)) {
+		if(type != Type.RECEIVER &&
+		   im.isMouseClicked(MouseEvent.BUTTON1) &&
+		   window.contains(new Point2D.Float(im.getMouseX(), im.getMouseY())) &&
+		   sendIndex < (size + frameIndex)) {
+			em.add(new Frame(x() + 16 * sendIndex, y() + 16).setType(Frame.Type.DATA));
 			sendIndex++;
 		}
 	}
@@ -54,6 +63,12 @@ public class Window extends Entity {
 		
 		g.draw(window);
 	}
+	
+	public Window setType(Type type) {
+		this.type = type;
+		return this;
+	}
+	
 	public Window setIndex(int frameIndex) {
 		this.frameIndex = frameIndex;
 		return this;
@@ -64,9 +79,41 @@ public class Window extends Entity {
 	}
 	
 	public Window slideWindow() {
-		setIndex(frameIndex + 1);
-		sendIndex = frameIndex;
+		ARQManager arq = ARQManager.getInstance();
+		int move = 0;
+		
+		switch(type) {
+		case SENDER:
+			for(int i = 0; i < size; i++, move++) {
+				if(arq.sender().frame(i + frameIndex).type() != StaticFrame.Type.RECEIVED) break;
+			}
+			break;
+		case RECEIVER:
+			for(int i = 0; i < size; i++, move++) {
+				if(arq.receiver().frame(i + frameIndex).type() != StaticFrame.Type.RECEIVED) break;
+			}
+			break;
+		}
+		setIndex(frameIndex + move);
 		return this;
+	}
+	
+	public void resendFrom(int frameIndex) {
+		EntityManager em = EntityManager.getInstance();
+		
+		switch(type) {
+		case SENDER:
+			for(int i = frameIndex; i < size; i++) {
+				em.add(new Frame(x() + 16 * frameIndex, y() + 16).setType(Frame.Type.DATA));
+			}
+			break;
+		case RECEIVER:
+			for(int i = frameIndex; i < size; i++) {
+			
+			}
+			break;
+		}
+		
 	}
 	
 	public Window setSize(int size) {
@@ -77,10 +124,5 @@ public class Window extends Entity {
 	
 	public int size() {
 		return size;
-	}
-	
-	public void senderWindow() {
-		InputManager im = InputManager.getInstance();
-		im.define("Send Data", KeyEvent.VK_SPACE);
 	}
 }

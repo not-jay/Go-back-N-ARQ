@@ -2,10 +2,13 @@ package com.xtouchme.come420;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.event.MouseEvent;
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 
 import com.xtouchme.gamebase.entities.Entity;
 import com.xtouchme.gamebase.managers.EntityManager;
+import com.xtouchme.gamebase.managers.InputManager;
 
 public class Frame extends Entity {
 
@@ -21,16 +24,11 @@ public class Frame extends Entity {
 	}
 	
 	private Type type;
-	private Rectangle2D.Float frame;
+	private Rectangle2D frame;
 	
 	//Initialization
 	//x, y - position
 	//frame - frame itself :)
-	
-	//Para mu add ug frame
-	//sa GoBackNARQ class, after sa em.add(new Title...);
-	//pag add ug em.add(new Frame(x position, y position), pero manu2 kaayu ni na way
-	//akong idea is to have the SlidingWindow class add the frames sa iyang constructor (ug ang Window sd)
 	public Frame(float x, float y) {
 		super(x, y);
 		
@@ -40,7 +38,6 @@ public class Frame extends Entity {
 		setHitbox(frame).setCollidable(true);
 	}
 
-	//
 	public Frame setType(Type type) {
 		this.type = type;
 		return this;
@@ -48,22 +45,29 @@ public class Frame extends Entity {
 	
 	@Override
 	public void update(int delta) {
+		InputManager im = InputManager.getInstance();
+		
+		if(im.isMouseClicked(MouseEvent.BUTTON2) && frame.contains(new Point2D.Float(im.getMouseX(), im.getMouseY())) && type == Type.DATA) {
+			setType(Type.DAMAGED_DATA);
+		}
+		if(im.isMouseClicked(MouseEvent.BUTTON3) && frame.contains(new Point2D.Float(im.getMouseX(), im.getMouseY()))) {
+			EntityManager.getInstance().remove(this);
+		}
 		
 		//Movement handling
 		switch(type) {
 		case ACK:
 		case NACK:
-			setSpeed(0, -1);	//Rising at 0.5 pixels/update
+			setSpeed(0, -0.5f);	//Rising at 1 pixels/update
 			break;
 		case DATA:
 		case DAMAGED_DATA:
-			setSpeed(0, 1);	//Falling at 0.5 pixels/update
+			setSpeed(0, 0.5f);		//Falling at 1 pixels/update
 			break;
 		default:			  	//Received and Blank are stationary
 		}
 		
 		super.update(delta);	//Calls Entity#update() to update the entity's position based on speed + updates the hitbox for collision
-		//Click handling TODO
 	}
 	
 	@Override
@@ -73,7 +77,7 @@ public class Frame extends Entity {
 		Color def = g.getColor();
 		Color typeColor = getColor();
 		
-		if(typeColor != null) { //If it isn't a blank frame, fill with color
+		if(typeColor != null) {
 			g.setColor(getColor());
 			g.fill(frame);
 		}
