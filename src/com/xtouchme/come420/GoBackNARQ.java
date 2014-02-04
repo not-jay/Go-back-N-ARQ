@@ -11,6 +11,7 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
+import com.xtouchme.come420.Frame.Type;
 import com.xtouchme.gamebase.managers.EntityManager;
 import com.xtouchme.gamebase.managers.InputManager;
 import com.xtouchme.gamebase.managers.ResourceManager;
@@ -20,8 +21,9 @@ public class GoBackNARQ extends Applet implements Runnable, KeyListener, MouseLi
 	
 	private static final long serialVersionUID = 959084623062324290L;
 	
-	protected EntityManager em;
-	protected InputManager im;
+	private ARQManager am;
+	private EntityManager em;
+	private InputManager im;
 	
 	//For double buffering
 	private Image image;
@@ -56,12 +58,21 @@ public class GoBackNARQ extends Applet implements Runnable, KeyListener, MouseLi
 		//Initialize managers
 		ResourceManager.getInstance(getDocumentBase(), "data"); //Holds methods for getting resources, initialized with the "data" folder
 		SettingsManager.getInstance().setResolution(getWidth(), getHeight()); //Holds settings, initialized with the window's width and height
+		am = ARQManager.getInstance(); //Holds ARQ logic
 		em = EntityManager.getInstance(); //Holds all the entities used in the program/game, handles the updating, rendering and collision detection of all entities.
 		im = InputManager.getInstance(); //Handles the keyboard and mouse input
 		
 		lastFrame = System.currentTimeMillis();
 		
 		em.add(new Title(getWidth()/2, 50)); //Adds the Title entity to the window
+		am.setSender(new SlidingWindow(30, 165).setType(SlidingWindow.Type.SENDER).fillFrames(42));
+		am.setReceiver(new SlidingWindow(30, 400).setType(SlidingWindow.Type.RECEIVER).fillFrames(42));
+		
+//		em.add(new com.xtouchme.come420.Frame(30, 181).setType(Type.DATA));
+//		em.add(new com.xtouchme.come420.Frame(46, 181).setType(Type.DATA));
+//		em.add(new com.xtouchme.come420.Frame(62, 181).setType(Type.DATA));
+//		em.add(new com.xtouchme.come420.Frame(78, 181).setType(Type.DATA));
+//		em.add(new com.xtouchme.come420.Frame(94, 181).setType(Type.DATA));
 	}
 	
 	@Override

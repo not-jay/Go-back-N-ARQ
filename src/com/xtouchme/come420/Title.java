@@ -4,8 +4,11 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.Toolkit;
+import java.awt.event.MouseEvent;
 
 import com.xtouchme.gamebase.entities.Entity;
+import com.xtouchme.gamebase.managers.EntityManager;
+import com.xtouchme.gamebase.managers.InputManager;
 import com.xtouchme.gamebase.managers.ResourceManager;
 
 public class Title extends Entity {
@@ -25,6 +28,18 @@ public class Title extends Entity {
 		setWidth(fontMetrics.stringWidth(text)).setHeight(fontMetrics.getHeight());					//Set width and height
 	}
 
+	@Override
+	public void update(int delta) {
+		super.update(delta);
+		
+		InputManager im = InputManager.getInstance();
+		EntityManager em = EntityManager.getInstance();
+		
+		if(im.isMouseClicked(MouseEvent.BUTTON1)) {
+			em.add(new Frame(im.getMouseX(), im.getMouseY()));
+		}
+	}
+	
 	@Override
 	public void render(Graphics2D g) {
 		//Draws the text with the font, centered @ x, y

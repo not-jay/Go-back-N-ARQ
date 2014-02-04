@@ -7,17 +7,12 @@ import java.awt.geom.Rectangle2D;
 import com.xtouchme.gamebase.entities.Entity;
 import com.xtouchme.gamebase.managers.EntityManager;
 
-public class Frame extends Entity {
+public class StaticFrame extends Entity {
 
 	//TODO: Collision detection + GO-BACK-N ARQ Logic
 	
-	//States sa Frame
-	//Everything should be "sabot"-able
-	//Except sa:
-	//	- BLANK: Katung black outlines dapit sa "Sender" ug "Receiver"
-	//	- RECIEVED: Mu change ang state ni BLANK to this kung maka dawat siya ug stuff
 	public enum Type {
-		DATA, DAMAGED_DATA, ACK, NACK
+		RECEIVED, BLANK
 	}
 	
 	private Type type;
@@ -31,39 +26,19 @@ public class Frame extends Entity {
 	//sa GoBackNARQ class, after sa em.add(new Title...);
 	//pag add ug em.add(new Frame(x position, y position), pero manu2 kaayu ni na way
 	//akong idea is to have the SlidingWindow class add the frames sa iyang constructor (ug ang Window sd)
-	public Frame(float x, float y) {
+	public StaticFrame(float x, float y) {
 		super(x, y);
 		
 		setWidth(8).setHeight(16);
 		
+		setType(Type.BLANK);
 		frame = new Rectangle2D.Float(x - width()/2, y - height()/2, width(), height());
 		setHitbox(frame).setCollidable(true);
 	}
-
-	//
-	public Frame setType(Type type) {
+	
+	private StaticFrame setType(Type type) {
 		this.type = type;
 		return this;
-	}
-	
-	@Override
-	public void update(int delta) {
-		
-		//Movement handling
-		switch(type) {
-		case ACK:
-		case NACK:
-			setSpeed(0, -1);	//Rising at 0.5 pixels/update
-			break;
-		case DATA:
-		case DAMAGED_DATA:
-			setSpeed(0, 1);	//Falling at 0.5 pixels/update
-			break;
-		default:			  	//Received and Blank are stationary
-		}
-		
-		super.update(delta);	//Calls Entity#update() to update the entity's position based on speed + updates the hitbox for collision
-		//Click handling TODO
 	}
 	
 	@Override
@@ -84,31 +59,33 @@ public class Frame extends Entity {
 	}
 	
 	@Override
-	public void updateHitbox() {
-		frame.setRect(x() - width()/2, y() - height()/2, width(), height());
-	}
-	
-	@Override
 	public boolean collides(Entity other) {
-		if(!(other instanceof StaticFrame)) return false;
+		if(!(other instanceof Frame)) return false;
 		return super.collides(other);
 	}
 	
 	@Override
 	public void collisionResponse(Entity other) {
-		EntityManager.getInstance().remove(this);
-	}
-	
-	public Type type() {
-		return type;
+		Frame frame = (Frame)other;
+		EntityManager em = EntityManager.getInstance();
+		
+		switch(frame.type()) {
+		case ACK:
+			setType(Type.RECEIVED);
+			ARQManager.getInstance().sender().window().slideWindow();
+			break;
+		case DATA:
+			setType(Type.RECEIVED);
+			em.add(new Frame(x(), y() - 16).setType(Frame.Type.ACK));
+			ARQManager.getInstance().receiver().window().slideWindow();
+			break;
+		}
 	}
 	
 	private Color getColor() {
 		switch(type) {
-		case DAMAGED_DATA:	return Color.RED;
-		case NACK:			return Color.BLUE;
-		case ACK:			return Color.GREEN;
-		case DATA:			return Color.YELLOW;
+		case RECEIVED:		return Color.GRAY;
+		case BLANK:
 		default:			return null;
 		}
 	}
