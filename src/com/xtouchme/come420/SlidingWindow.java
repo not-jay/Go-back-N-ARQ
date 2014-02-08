@@ -70,4 +70,8 @@ public class SlidingWindow extends Entity {
 	public StaticFrame frame(int index) {
 		return frames.get(index);
 	}
+	
+	public int maxFrames() {
+		return frames.size();
+	}
 }

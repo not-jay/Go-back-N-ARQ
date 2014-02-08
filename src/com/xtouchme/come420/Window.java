@@ -5,7 +5,6 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 
-import com.xtouchme.come420.Frame.Type;
 import com.xtouchme.gamebase.entities.Entity;
 import com.xtouchme.gamebase.managers.EntityManager;
 import com.xtouchme.gamebase.managers.InputManager;
@@ -21,6 +20,7 @@ public class Window extends Entity {
 	private int size;
 	private int frameIndex;
 	private int sendIndex;
+	private int sent;
 	private Type type;
 	private Rectangle2D window;
 	
@@ -31,7 +31,7 @@ public class Window extends Entity {
 		
 		setIndex(0).setHeight(32);
 		
-		sendIndex = frameIndex;
+		sendIndex = sent = frameIndex;
 		window = new Rectangle2D.Float(x() - 8 + (16 * frameIndex), y() - height()/2, width(), height());
 	}
 
@@ -41,14 +41,18 @@ public class Window extends Entity {
 		
 		EntityManager em = EntityManager.getInstance();
 		InputManager im = InputManager.getInstance();
+		ARQManager arq = ARQManager.getInstance();
 		
 		//if(im.isKeyPressed("Send Data") && sendIndex < (size + frameIndex)) {
 		if(type != Type.RECEIVER &&
 		   im.isMouseClicked(MouseEvent.BUTTON1) &&
 		   window.contains(new Point2D.Float(im.getMouseX(), im.getMouseY())) &&
-		   sendIndex < (size + frameIndex)) {
-			em.add(new Frame(x() + 16 * sendIndex, y() + 16).setType(Frame.Type.DATA));
+		   sendIndex < (size + frameIndex) && 
+		   sendIndex < arq.sender().maxFrames()) {
+			em.add(new Frame(x() + 16 * sendIndex, y() + 16).setIndex(sendIndex).setType(Frame.Type.DATA));
+			arq.addTimeout(Window.Type.RECEIVER, sendIndex);
 			sendIndex++;
+			sent++;
 		}
 	}
 	
@@ -100,17 +104,17 @@ public class Window extends Entity {
 	
 	public void resendFrom(int frameIndex) {
 		EntityManager em = EntityManager.getInstance();
+		ARQManager arq = ARQManager.getInstance();
 		
 		switch(type) {
 		case SENDER:
-			for(int i = frameIndex; i < size; i++) {
-				em.add(new Frame(x() + 16 * frameIndex, y() + 16).setType(Frame.Type.DATA));
+			for(int i = frameIndex; i < sent; i++) {
+				em.add(new Frame(x() + 16 * i, y() + 16).setIndex(i).setType(Frame.Type.DATA));
 			}
 			break;
 		case RECEIVER:
-			for(int i = frameIndex; i < size; i++) {
-			
-			}
+			em.add(new Frame(x() + 16 * frameIndex, y() - 16).setIndex(frameIndex).setType(Frame.Type.NACK));
+			arq.addTimeout(Type.SENDER, frameIndex);
 			break;
 		}
 		

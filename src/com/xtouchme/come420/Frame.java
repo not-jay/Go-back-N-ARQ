@@ -23,6 +23,7 @@ public class Frame extends Entity {
 		DATA, DAMAGED_DATA, ACK, NACK
 	}
 	
+	private int index;
 	private Type type;
 	private Rectangle2D frame;
 	
@@ -38,6 +39,15 @@ public class Frame extends Entity {
 		setHitbox(frame).setCollidable(true);
 	}
 
+	public Frame setIndex(int index) {
+		this.index = index;
+		return this;
+	}
+	
+	public int index() {
+		return index;
+	}
+	
 	public Frame setType(Type type) {
 		this.type = type;
 		return this;
@@ -58,11 +68,11 @@ public class Frame extends Entity {
 		switch(type) {
 		case ACK:
 		case NACK:
-			setSpeed(0, -0.5f);	//Rising at 1 pixels/update
+			setSpeed(0, -1f);	//Rising at 1 pixels/update
 			break;
 		case DATA:
 		case DAMAGED_DATA:
-			setSpeed(0, 0.5f);		//Falling at 1 pixels/update
+			setSpeed(0, 1f);	//Falling at 1 pixels/update
 			break;
 		default:			  	//Received and Blank are stationary
 		}

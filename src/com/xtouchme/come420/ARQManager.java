@@ -14,6 +14,8 @@ public class ARQManager extends Entity {
 	private SlidingWindow receiver;
 	private HashMap<Integer, Integer> senderTimeout;
 	private HashMap<Integer, Integer> receiverTimeout;
+	private List<Integer> removeSend;
+	private List<Integer> removeReceive;
 	
 	private int timeout;
 	private int windowSize;
@@ -26,15 +28,36 @@ public class ARQManager extends Entity {
 	public void update(int delta) {
 		List<Integer> remove = new ArrayList<>();
 		
+		for(int i : removeSend) senderTimeout.remove(i);
+		removeSend.clear();
+		for(int i : removeReceive) receiverTimeout.remove(i);
+		removeReceive.clear();
+		
 		for(int i : senderTimeout.keySet()) {
 			senderTimeout.put(i, senderTimeout.get(i) - delta);
+			System.out.println("S: " + i + " " + senderTimeout.get(i));
 			if(senderTimeout.get(i) <= 0) {
 				sender.window().resendFrom(i);
+				addTimeout(Window.Type.RECEIVER, i);
 				remove.add(i);
 			}
 		}
 		for(int i : remove) {
 			senderTimeout.remove(i);
+		}
+		remove.clear();
+		
+		for(int i : receiverTimeout.keySet()) {
+			receiverTimeout.put(i, receiverTimeout.get(i) - delta);
+			System.out.println("R: " + i + " " + receiverTimeout.get(i));
+			if(receiverTimeout.get(i) <= 0) {
+				receiver.window().resendFrom(i);
+				addTimeout(Window.Type.SENDER, i);
+				remove.add(i);
+			}
+		}
+		for(int i : remove) {
+			receiverTimeout.remove(i);
 		}
 		remove.clear();
 	}
@@ -75,11 +98,35 @@ public class ARQManager extends Entity {
 		return windowSize;
 	}
 	
+	public ARQManager addTimeout(Type type, int frameIndex) {
+		switch(type) {
+		case SENDER:	senderTimeout.put(frameIndex, timeout); break;
+		case RECEIVER:	receiverTimeout.put(frameIndex, timeout); break;
+		}
+		return this;
+	}
+	
+	public ARQManager cancelTimeout(Type type, int frameIndex) {
+		switch(type) {
+		case SENDER:	removeSend.add(frameIndex); break;
+		case RECEIVER:	removeReceive.add(frameIndex); break;
+		}
+		return this;
+	}
+	
+	public ARQManager resetTimeout(Type type, int frameIndex) {
+		return addTimeout(type, frameIndex);
+	}
+	
 	private ARQManager() {
 		super(0, 0);
 		timeout = 15000;
 		windowSize = 5;
 		EntityManager.getInstance().add(this);
+		senderTimeout = new HashMap<>();
+		receiverTimeout = new HashMap<>();
+		removeSend = new ArrayList<>();
+		removeReceive = new ArrayList<>();
 	}
 	public static ARQManager getInstance() {
 		if(instance == null) instance = new ARQManager();
