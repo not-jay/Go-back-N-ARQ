@@ -62,7 +62,6 @@ public class GoBackNARQ extends Applet implements Runnable, KeyListener, MouseLi
 		im = InputManager.getInstance(); //Handles the keyboard and mouse input
 		
 		lastFrame = System.currentTimeMillis();
-		am.setTimeout(10000);
 		
 		em.add(new Title(getWidth()/2, 50)); //Adds the Title entity to the window
 		am.setSender(new SlidingWindow(30, 165).setType(SlidingWindow.Type.SENDER).fillFrames(42));

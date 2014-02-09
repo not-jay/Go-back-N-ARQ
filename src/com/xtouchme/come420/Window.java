@@ -45,6 +45,8 @@ public class Window extends Entity {
 		InputManager im = InputManager.getInstance();
 		ARQManager arq = ARQManager.getInstance();
 		
+		setSize(arq.windowSize());
+		
 		if(!im.isMouseDown(MouseEvent.BUTTON1)) clicked = false;
 		
 		//if(im.isKeyPressed("Send Data") && sendIndex < (size + frameIndex)) {
@@ -56,6 +58,7 @@ public class Window extends Entity {
 		   !clicked) {
 			em.add(new Frame(x() + 16 * sendIndex, y() + 16).setIndex(sendIndex).setType(Frame.Type.DATA));
 			arq.addTimeout(Window.Type.RECEIVER, sendIndex);
+			arq.disableInput();
 			sendIndex++;
 			sent++;
 			clicked = true;
@@ -95,12 +98,14 @@ public class Window extends Entity {
 		switch(type) {
 		case SENDER:
 			for(int i = 0; i < size; i++, move++) {
-				if(arq.sender().frame(i + frameIndex).type() != StaticFrame.Type.RECEIVED) break;
+				if(arq.sender().frame(i + frameIndex).type() != StaticFrame.Type.RECEIVED ||
+				   frameIndex + move + size >= arq.sender().maxFrames()) break;
 			}
 			break;
 		case RECEIVER:
 			for(int i = 0; i < size; i++, move++) {
-				if(arq.receiver().frame(i + frameIndex).type() != StaticFrame.Type.RECEIVED) break;
+				if(arq.receiver().frame(i + frameIndex).type() != StaticFrame.Type.RECEIVED ||
+				   frameIndex + move + size >= arq.receiver().maxFrames()) break;
 			}
 			break;
 		}

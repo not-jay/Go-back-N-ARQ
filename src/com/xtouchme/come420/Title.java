@@ -6,6 +6,7 @@ import java.awt.Graphics2D;
 import java.awt.Toolkit;
 
 import com.xtouchme.gamebase.entities.Entity;
+import com.xtouchme.gamebase.managers.EntityManager;
 import com.xtouchme.gamebase.managers.ResourceManager;
 
 public class Title extends Entity {
@@ -23,10 +24,16 @@ public class Title extends Entity {
 		font = ResourceManager.getInstance(null).getFont(Font.TRUETYPE_FONT, "Boxy-Bold.ttf", 16);	//Load font
 		text = "Go-Back-N ARQ";
 		winSize = "Window Size :";
-		timeout = "Timeout :";
+		timeout = "Timeout (ms):";
 		
 		fontMetrics = Toolkit.getDefaultToolkit().getFontMetrics(font);								//Get fontMetrics for getting text width based on font
 		setWidth(fontMetrics.stringWidth(text)).setHeight(fontMetrics.getHeight());					//Set width and height
+		
+		EntityManager em = EntityManager.getInstance();
+		ARQManager arq = ARQManager.getInstance();
+		
+		em.add(new Input(50 + fontMetrics.stringWidth(winSize), 80).setType(Input.Type.WINSIZE).setValue(arq.windowSize()).setStep(1).setLimit(43));
+		em.add(new Input(50 + fontMetrics.stringWidth(winSize), 110).setType(Input.Type.TIMEOUT).setValue(arq.timeout()).setStep(100));
 	}
 
 	@Override
@@ -40,7 +47,7 @@ public class Title extends Entity {
 		g.setFont(font);
 		g.drawString(text, x() - width()/2, y());
 		g.drawString(winSize, 23, 80);
-		g.drawString(timeout, 71, 110);
+		g.drawString(timeout, 23, 110);
 		g.setFont(def);
 	}
 	

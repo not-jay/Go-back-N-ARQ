@@ -20,6 +20,8 @@ public class ARQManager extends Entity {
 	private int timeout;
 	private int windowSize;
 	
+	private boolean disableInput;
+	
 	private static ARQManager instance = null;
 	
 	//TODO: Timeout things
@@ -35,7 +37,7 @@ public class ARQManager extends Entity {
 		
 		for(int i : senderTimeout.keySet()) {
 			senderTimeout.put(i, senderTimeout.get(i) - delta);
-//			System.out.println("S: " + i + " " + senderTimeout.get(i));
+			System.out.println("S: " + i + " " + senderTimeout.get(i));
 			if(senderTimeout.get(i) <= 0) {
 				sender.window().resendFrom(i);
 				addTimeout(Window.Type.RECEIVER, i);
@@ -49,7 +51,7 @@ public class ARQManager extends Entity {
 		
 		for(int i : receiverTimeout.keySet()) {
 			receiverTimeout.put(i, receiverTimeout.get(i) - delta);
-//			System.out.println("R: " + i + " " + receiverTimeout.get(i));
+			System.out.println("R: " + i + " " + receiverTimeout.get(i));
 			if(receiverTimeout.get(i) <= 0) {
 				receiver.window().resendFrom(i);
 				addTimeout(Window.Type.SENDER, i);
@@ -94,8 +96,21 @@ public class ARQManager extends Entity {
 		return this;
 	}
 	
+	public ARQManager disableInput() {
+		this.disableInput = true;
+		return this;
+	}
+	
+	public boolean isInputDisabled() {
+		return disableInput;
+	}
+	
 	public int windowSize() {
 		return windowSize;
+	}
+	
+	public int timeout() {
+		return timeout;
 	}
 	
 	public ARQManager addTimeout(Type type, int frameIndex) {
@@ -127,6 +142,8 @@ public class ARQManager extends Entity {
 		receiverTimeout = new HashMap<>();
 		removeSend = new ArrayList<>();
 		removeReceive = new ArrayList<>();
+		disableInput = false;
+		
 	}
 	public static ARQManager getInstance() {
 		if(instance == null) instance = new ARQManager();

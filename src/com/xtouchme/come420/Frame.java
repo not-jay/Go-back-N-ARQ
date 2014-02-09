@@ -57,7 +57,7 @@ public class Frame extends Entity {
 	public void update(int delta) {
 		InputManager im = InputManager.getInstance();
 		
-		if(im.isMouseDown(MouseEvent.BUTTON1) && frame.contains(new Point2D.Float(im.getMouseX(), im.getMouseY())) && type == Type.DATA) {
+		if(im.isMouseDown(MouseEvent.BUTTON2) && frame.contains(new Point2D.Float(im.getMouseX(), im.getMouseY())) && type == Type.DATA) {
 			setType(Type.DAMAGED_DATA);
 		}
 		if(im.isMouseDown(MouseEvent.BUTTON3) && frame.contains(new Point2D.Float(im.getMouseX(), im.getMouseY()))) {
