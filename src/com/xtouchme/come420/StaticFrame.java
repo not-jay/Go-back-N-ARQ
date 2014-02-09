@@ -82,13 +82,13 @@ public class StaticFrame extends Entity {
 			break;
 		case DATA:
 			setType(Type.RECEIVED);
-			em.add(new Frame(x(), y() - 16).setType(Frame.Type.ACK));
+			em.add(new Frame(x(), y() - 16).setType(Frame.Type.ACK).setIndex(frame.index()));
 			arq.receiver().window().slideWindow();
 			arq.cancelTimeout(Window.Type.RECEIVER, frame.index());
 			arq.addTimeout(Window.Type.SENDER, frame.index());
 			break;
 		case DAMAGED_DATA:
-			em.add(new Frame(x(), y() - 16).setType(Frame.Type.NACK));
+			em.add(new Frame(x(), y() - 16).setType(Frame.Type.NACK).setIndex(frame.index()));
 			arq.cancelTimeout(Window.Type.RECEIVER, frame.index());
 			arq.addTimeout(Window.Type.SENDER, frame.index());
 			break;

@@ -21,6 +21,7 @@ public class Window extends Entity {
 	private int frameIndex;
 	private int sendIndex;
 	private int sent;
+	private boolean clicked;
 	private Type type;
 	private Rectangle2D window;
 	
@@ -28,6 +29,7 @@ public class Window extends Entity {
 		super(x, y);
 		
 		size = ARQManager.getInstance().windowSize();
+		clicked = false;
 		
 		setIndex(0).setHeight(32);
 		
@@ -43,16 +45,20 @@ public class Window extends Entity {
 		InputManager im = InputManager.getInstance();
 		ARQManager arq = ARQManager.getInstance();
 		
+		if(!im.isMouseDown(MouseEvent.BUTTON1)) clicked = false;
+		
 		//if(im.isKeyPressed("Send Data") && sendIndex < (size + frameIndex)) {
 		if(type != Type.RECEIVER &&
-		   im.isMouseClicked(MouseEvent.BUTTON1) &&
+		   im.isMouseDown(MouseEvent.BUTTON1) &&
 		   window.contains(new Point2D.Float(im.getMouseX(), im.getMouseY())) &&
 		   sendIndex < (size + frameIndex) && 
-		   sendIndex < arq.sender().maxFrames()) {
+		   sendIndex < arq.sender().maxFrames() &&
+		   !clicked) {
 			em.add(new Frame(x() + 16 * sendIndex, y() + 16).setIndex(sendIndex).setType(Frame.Type.DATA));
 			arq.addTimeout(Window.Type.RECEIVER, sendIndex);
 			sendIndex++;
 			sent++;
+			clicked = true;
 		}
 	}
 	
